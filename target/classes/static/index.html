@@ -1,0 +1,240 @@
+<html lang="pt-br" xmlns="http://www.thymeleaf.org">
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title> </title>
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<style type="text/css">
+		html {
+			margin-left: 5%;
+			margin-right: 5%;
+			margin-top: 5%;
+			
+		}
+
+		.modal {
+			text-align: center;
+			padding: 0 !important;
+			
+		}
+
+		.modal:before {
+			content: '';
+			display: inline-block;
+			height: 100%;
+			vertical-align: middle;
+			margin-right: -4px;
+		}
+
+		.modal-dialog {
+			display: inline-block;
+			text-align: left;
+			vertical-align: middle;
+			background-color: antiquewhite;
+		}
+	</style>
+</head>
+
+<body>
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"
+		integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+		crossorigin="anonymous"></script>
+
+	<div class="mb-3">
+		<form action="" id="form">
+			<div class="mb-3">
+				<label for="id" class="form-label">ID</label>
+				<input type="text" class="form-control" id="id" readonly="readonly">
+			</div>
+			<div class="mb-3">
+				<label for="nome" class="form-label">NOME DO COMPROMISSO</label>
+				<input type="text" class="form-control" id="nome" placeholder="informe o nome" required="required">
+			</div>
+			<div class="mb-3">
+				<label for="data" class="form-label">DATA</label>
+				<input type="date" class="form-control" id="data" required="required">
+			</div>
+			<div class="mb-3">
+				<label for="local" class="form-label">LOCAL</label>
+				<input type="text" class="form-control" id="local" required="required">
+			</div>
+			<div class="mb-3">
+				<label for="horario" class="form-label">HORÁRIO</label>
+				<input type="time" class="form-control" id="horario" required="required">
+			</div>
+
+		</form>
+	</div>
+	<button type="button" class="btn btn-secondary" onclick="document.getElementById('form').reset();">Novo</button>
+	<button type="button" class="btn btn-primary" onclick="salvarCompromisso()">Salvar</button>
+	<button type="button" class="btn btn-warning" onclick="limpar()" data-bs-toggle="modal" data-bs-target="#modalPesquisar" >Pesquisar</button>
+	<button type="button" class="btn btn-danger" onclick="deletar()">Excluir</button>
+
+
+	<div class="modal fade" id="modalPesquisar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Compromissos</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form>
+						<div class="mb-3">
+							<label for="buscarNome" class="col-form-label">Informe o nome:</label>
+							<input type="text" class="form-control" id="buscarNome">
+						</div>
+
+						<button type="button" id="buscarModal" class="btn btn-success" onclick="pesquisa()">Buscar</button>
+					</form>
+					<div style="height: 400px;">
+						<table class="table" id="tabelaResultados">
+							<thead>
+								<tr>
+									<th scope="col">ID</th>
+									<th scope="col">NOME</th>
+									<th scope="col">DATA</th>
+									<th scope="col">LOCAL</th>
+									<th scope="col">HORÁRIO</th>
+									<th scope="col">EDITAR</th>
+									<th scope="col">EXCLUIR</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-dark" data-bs-dismiss="modal" onclick="limpar2()" >Fechar</button>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		
+		function limpar() {
+			document.getElementById('buscarNome').value='';
+		}
+		
+		function limpar2() {
+			$("#tabelaResultados tr>td").remove();
+			
+		}
+		
+		function pesquisa() {
+		
+			var nome = $('#buscarNome').val();
+			if (nome != null && nome.trim() != '') {
+				$.ajax({
+					method: "GET",
+					url: "buscarPorNome",
+					data: "nome=" + nome,
+					success: function (response) {
+						$('#tabelaResultados  > tbody > tr').remove();
+						for (var c = 0; c < response.length; c++) {
+							$('#tabelaResultados > tbody').
+								append('<tr> id ="' + response[c].id + '"<td>' + response[c].id + '</td> <td>' + response[c].nome + '</td> <td>' + response[c].data + '</td> <td>' + response[c].local + '</td> <td>' + response[c].horario + '</td> <td><button type="button" onclick = "editar(' + response[c].id + ')"  class="btn btn-primary">Ver</button> </td><td><button type="button" onclick = "excluir(' + response[c].id + ')"  class="btn btn-danger">Excluir</button></td> </tr>')
+						}
+                        
+					}
+				}).fail(function (xhr, status, errorThrown) {
+
+				});
+
+			}
+		}
+		function excluir(id) {
+			if (confirm('Deseja realmete Excluir?')) {
+				$.ajax({
+					method: "DELETE",
+					url: "delete",
+					data: "idcompromisso=" + id,
+					success: function (response) {
+						$('#' + id).reset();
+						alert(response);
+					}
+				}).fail(function (xhr, status, errorThrown) {
+					alert("Erro ao Excluir usuario por id " + xhr.responseText);
+				});
+			}
+		}
+		function deletar() {
+			var id = $("#id").val();
+			if (id != null && id.trim() != '') {
+			excluir(id);
+			document.getElementById('form').reset();
+		    }
+		
+		}
+		function editar(id) {
+
+			$.ajax({
+				method: "GET",
+				url: "buscarCompromissoid",
+				data: "idcompromisso=" + id,
+				success: function (response) {
+					$("#id").val(response.id);
+					$("#nome").val(response.nome);
+					$("#data").val(response.data);
+					$("#local").val(response.local);
+					$("#horario").val(response.horario);
+					$('#modalPesquisar').modal('hide');
+
+				}
+			}).fail(function (xhr, status, errorThrown) {
+				alert("Erro ao Buscar usuario por id " + xhr.responseText);
+			});
+
+		}
+
+		function salvarCompromisso() {
+			var id = $("#id").val();
+			var nome = $("#nome").val();
+			var data = $("#data").val();
+			var local = $("#local").val();
+			var horario = $("#horario").val();
+            if(nome == null || nome!= null && nome.trim()== ''){
+				$("#nome").focus();
+				alert('informe o nome');
+				return;
+			}
+			 if(data == null || data!= null && data.trim()== ''){
+				 $("#data").focus();
+				alert('informe a data');
+				return;
+			}
+			 if(local == null || local!= null && local.trim()== ''){
+				 $("#local").focus();
+				alert('informe o local');
+				return;
+			}
+			 if(horario == null || horario!= null && horario.trim()== ''){
+				 $("#horario").focus();
+				alert('informe o horario');
+				return;
+			}
+			$.ajax({
+				method: "POST",
+				url: "salvar",
+				data: JSON.stringify({id: id, nome: nome, data: data, local: local, horario: horario}),
+				contentType: "application/json; charset-utf-8",
+				success: function (response) {
+					$("#id").val(response.id);
+					alert("Salvo com Sucesso!");
+				}
+			}).fail(function (xhr, status, errorThrown) {
+				alert("Erro ao Salvar" + xhr.responseText);
+			});
+		}
+	</script>
+</body>
+
+</html>
